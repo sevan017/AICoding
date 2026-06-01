@@ -20,10 +20,34 @@
       "Bash(curl -s -X POST http://localhost:3000/api/auth/register -H \"Content-Type: application/json\" -d '{\"email\":\"bad\",\"password\":\"123456\",\"name\":\"新用户\"}')",
       "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"TEST@EXAMPLE.com\",\"password\":\"123456\"}')",
       "Bash(curl -s -X POST http://localhost:3000/api/auth/register -H \"Content-Type: application/json\" -d '{\"email\":\"new@test.com\",\"password\":\"123456\",\"name\":\"新用户\"}')",
-      "Bash(time curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"no@user.com\",\"password\":\"test1234\"}' -o /dev/null -w \"HTTP %{http_code} Time: %{time_total}s\\\\n\")"
+      "Bash(time curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"no@user.com\",\"password\":\"test1234\"}' -o /dev/null -w \"HTTP %{http_code} Time: %{time_total}s\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/cart)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}' -c cart-cookies.txt)",
+      "Bash(curl -s -b cart-cookies.txt http://localhost:3000/api/cart)",
+      "Bash(curl -s -X PUT http://localhost:3000/api/cart/cmpuywcb8000lfko95jxf4ves -H 'Content-Type: application/json' -b cart-cookies.txt -d '{\"quantity\":5}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/cart -H \"Content-Type: application/json\" -b cart-cookies.txt -d '{\"productId\":\"cmpuxfzpy001a7nl5pj2d2d54\",\"quantity\":2}')",
+      "Bash(curl -s -X PUT \"http://localhost:3000/api/cart/cmpuywcb8000lfko95jxf4ves\" -H \"Content-Type: application/json\" -b cart-cookies.txt -d '{\"quantity\":999}')",
+      "Bash(curl -s -X DELETE \"http://localhost:3000/api/cart/cmpuywcb8000lfko95jxf4ves\" -b cart-cookies.txt)",
+      "Bash(curl -s http://localhost:3000/api/cart)",
+      "Bash(curl -s -X POST http://localhost:3000/api/cart -H \"Content-Type: application/json\" -d '{\"productId\":\"x\",\"quantity\":1}')",
+      "Bash(mkdir -p src/app/api/orders/[id] src/app/orders/[id] 2>&1)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}' -c order-cookies.txt)",
+      "Bash(curl -s -b order-cookies.txt http://localhost:3000/api/orders)",
+      "Bash(curl -s -b order-cookies.txt http://localhost:3000/api/auth/me)",
+      "Bash(curl -s -X PUT \"http://localhost:3000/api/orders/cmpuz2e31000yfko9i8tdikt5\" -H \"Content-Type: application/json\" -b order-cookies.txt -d '{\"status\":\"PENDING\"}')",
+      "Bash(curl -s -X PUT \"http://localhost:3000/api/orders/cmpuz2e31000yfko9i8tdikt5\" -H \"Content-Type: application/json\" -b order-cookies.txt -d '{\"status\":\"SHIPPED\"}')",
+      "Bash(curl -s -X PUT \"http://localhost:3000/api/orders/cmpuz2e31000yfko9i8tdikt5\" -H \"Content-Type: application/json\" -b order-cookies.txt -d '{\"status\":\"COMPLETED\"}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/orders)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:3000/orders/cmpuz2e31000yfko9i8tdikt5\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}' -c fix-cookies.txt)",
+      "Bash(curl -s \"http://localhost:3000/api/products?page=1\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/orders -b fix-cookies.txt)"
     ],
     "deny": [
       "Bash(rm -rf *)"
+    ],
+    "additionalDirectories": [
+      "d:\\AICoding\\mini_mall\\src\\app\\api\\orders"
     ]
   },
   "hooks": {

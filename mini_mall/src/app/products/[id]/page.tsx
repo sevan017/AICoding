@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getProductById } from "@/lib/products";
 import { notFound } from "next/navigation";
+import AddToCartButton from "@/components/product/AddToCartButton";
 
 /** 商品详情页 Props */
 interface ProductDetailPageProps {
@@ -93,19 +94,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </div>
 
           {/* 操作按钮 */}
-          <div className="mt-8 flex gap-4">
-            <button
-              disabled={product.stock === 0}
-              className="flex-1 py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              加入购物车
-            </button>
-            <Link
-              href="/"
-              className="py-3 px-6 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              返回商城
-            </Link>
+          <div className="mt-8">
+            <AddToCartButton productId={product.id} stock={product.stock} />
           </div>
         </div>
       </div>
