@@ -55,6 +55,11 @@ export default function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
+      {user.role === "ADMIN" && (
+        <Link href="/admin" className="text-sm text-amber-600 hover:text-amber-700 transition-colors">
+          后台
+        </Link>
+      )}
       <Link href="/profile" className="text-sm text-gray-700 hover:text-blue-600 transition-colors">
         {user.name}
         {user.role === "ADMIN" && (

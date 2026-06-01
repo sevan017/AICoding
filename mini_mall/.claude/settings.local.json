@@ -41,13 +41,41 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:3000/orders/cmpuz2e31000yfko9i8tdikt5\")",
       "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}' -c fix-cookies.txt)",
       "Bash(curl -s \"http://localhost:3000/api/products?page=1\")",
-      "Bash(curl -s -X POST http://localhost:3000/api/orders -b fix-cookies.txt)"
+      "Bash(curl -s -X POST http://localhost:3000/api/orders -b fix-cookies.txt)",
+      "Bash(mkdir -p src/app/api/admin/products/[id] src/app/api/admin/orders/[id] src/app/api/admin/categories/[id] src/app/admin/products src/app/admin/orders src/app/admin/categories 2>&1)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/register -H \"Content-Type: application/json\" -d '{\"email\":\"admin@minimall.com\",\"password\":\"admin123456\",\"name\":\"管理员\"}')",
+      "Bash(npx tsx *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@minimall.com\",\"password\":\"admin123456\"}' -c admin-cookies.txt)",
+      "Bash(curl -s -b admin-cookies.txt http://localhost:3000/api/admin/products)",
+      "Bash(curl -s -b admin-cookies.txt http://localhost:3000/api/admin/orders)",
+      "Bash(curl -s -b admin-cookies.txt http://localhost:3000/api/admin/categories)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}' -c user-cookies.txt)",
+      "Bash(curl -s -b user-cookies.txt http://localhost:3000/api/admin/products)",
+      "Bash(curl -s http://localhost:3000/api/admin/products)",
+      "Bash(curl -s -X POST http://localhost:3000/api/admin/categories -H \"Content-Type: application/json\" -b admin-cookies.txt -d '{\"name\":\"测试分类\",\"slug\":\"test-cat\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@minimall.com\",\"password\":\"admin123456\"}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@minimall.com\",\"password\":\"admin123456\"}' -c verify.txt)",
+      "Bash(curl -s -b verify.txt http://localhost:3000/api/admin/orders)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/products)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/orders)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/categories)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@minimall.com\",\"password\":\"admin123456\"}' -c t.txt)",
+      "Bash(curl -s -b t.txt \"http://localhost:3000/api/admin/products?page=1&pageSize=5\")",
+      "Bash(curl -s -b t.txt http://localhost:3000/api/admin/orders)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}' -c t2.txt)",
+      "Bash(curl -s -b t2.txt http://localhost:3000/api/admin/products)",
+      "Bash(curl -s -b t.txt \"http://localhost:3000/api/admin/products?page=1&pageSize=10\")",
+      "Bash(curl -s -b t.txt \"http://localhost:3000/api/admin/products?page=2&pageSize=10\")",
+      "Bash(curl -s -b t.txt \"http://localhost:3000/api/admin/products?category=phones-digital&pageSize=10\")",
+      "Bash(curl -s -b t.txt \"http://localhost:3000/api/admin/products?category=phones-digital&pageSize=5\")"
     ],
     "deny": [
       "Bash(rm -rf *)"
     ],
     "additionalDirectories": [
-      "d:\\AICoding\\mini_mall\\src\\app\\api\\orders"
+      "d:\\AICoding\\mini_mall\\src\\app\\api\\orders",
+      "d:\\AICoding\\mini_mall\\src\\app\\api\\admin\\products"
     ]
   },
   "hooks": {

@@ -22,14 +22,7 @@ interface OrderSummary {
   items: OrderItemSummary[];
 }
 
-/** 状态中英文映射 */
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  PENDING: { label: "待付款", color: "bg-yellow-100 text-yellow-700" },
-  PAID: { label: "已支付", color: "bg-blue-100 text-blue-700" },
-  SHIPPED: { label: "已发货", color: "bg-purple-100 text-purple-700" },
-  COMPLETED: { label: "已完成", color: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "已取消", color: "bg-gray-100 text-gray-500" },
-};
+import { STATUS_LABELS, STATUS_COLORS } from "@/lib/orders";
 
 /** 订单列表页 */
 export default function OrdersPage() {
@@ -94,7 +87,8 @@ export default function OrdersPage() {
 
       <div className="space-y-4">
         {orders.map((order) => {
-          const st = STATUS_MAP[order.status] || STATUS_MAP.PENDING;
+          const label = STATUS_LABELS[order.status] || order.status;
+          const color = STATUS_COLORS[order.status] || STATUS_COLORS.PENDING;
 
           return (
             <Link
@@ -107,8 +101,8 @@ export default function OrdersPage() {
                 <span className="text-xs text-gray-500 font-mono">
                   {order.id.slice(-8).toUpperCase()}
                 </span>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${st.color}`}>
-                  {st.label}
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${color}`}>
+                  {label}
                 </span>
               </div>
 
