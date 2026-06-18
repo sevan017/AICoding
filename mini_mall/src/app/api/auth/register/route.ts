@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, setSession } from "@/lib/auth";
+import { checkRateLimit, getClientIP, REGISTER_LIMIT } from "@/lib/rate-limit";
 
 /** 注册请求体 */
 interface RegisterBody {
@@ -21,6 +22,17 @@ export async function POST(request: NextRequest) {
     // 参数校验
     if (!email || !password || !name) {
       return NextResponse.json({ error: "请填写所有必填字段" }, { status: 400 });
+    }
+
+    // 速率限制
+    const clientIP = getClientIP(request);
+    const rateLimit = checkRateLimit(clientIP, "register", REGISTER_LIMIT);
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        { error: `请求过于频繁，请 ${retryAfter} 秒后重试` },
+        { status: 429 }
+      );
     }
 
     // 邮箱统一转小写
