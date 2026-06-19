@@ -1,2 +1,4 @@
-streamlit
-pandas
+# Web 应用框架（自动生成网页界面，无需写 HTML/CSS/JS）
+streamlit>=1.35.0
+# 数据处理（用于表格展示和图表数据准备）
+pandas>=2.2.0
