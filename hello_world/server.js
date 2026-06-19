@@ -4,8 +4,8 @@ const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.end(`<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><title>Hello</title></head>
-<body><h1>hello ai codeing</h1></body>
+<head><meta charset="UTF-8"><title>Hello AI Coding</title></head>
+<body><h1>hello ai coding</h1></body>
 </html>`);
 });
 
