@@ -1,65 +1,171 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import ProductCard from "@/components/product/ProductCard";
+import Pagination from "@/components/ui/Pagination";
 
-export default function Home() {
+const PAGE_SIZE = 9;
+
+interface HomePageProps {
+  searchParams: Promise<{
+    search?: string;
+    category?: string;
+    page?: string;
+  }>;
+}
+
+/**
+ * 首页 — 商品网格展示 + 搜索框 + 分类标签切换 + 分页
+ * Server Component，数据在服务端获取
+ */
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const search = params.search || "";
+  const categorySlug = params.category || "";
+  const currentPage = Math.max(1, parseInt(params.page || "1", 10));
+
+  // 并行加载：分类列表 + 商品数据
+  const [categories, productData] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { products: true } } },
+    }),
+    fetchProducts(search, categorySlug, currentPage),
+  ]);
+
+  const { products, total, totalPages } = productData;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* 页面标题 */}
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">商品列表</h1>
+
+        {/* 搜索框 */}
+        <form action="/" method="GET" className="mb-6">
+          {categorySlug && (
+            <input type="hidden" name="category" value={categorySlug} />
+          )}
+          <div className="flex gap-2 max-w-lg">
+            <input
+              type="text"
+              name="search"
+              defaultValue={search}
+              placeholder="搜索商品名称…"
+              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              搜索
+            </button>
+            {search && (
+              <Link
+                href={`/?${categorySlug ? `category=${categorySlug}` : ""}`}
+                className="px-4 py-2.5 text-sm text-gray-600 hover:text-gray-800 self-center"
+              >
+                清除
+              </Link>
+            )}
+          </div>
+        </form>
+
+        {/* 分类标签 */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          <Link
+            href="/"
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              !categorySlug
+                ? "bg-blue-600 text-white"
+                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+            }`}
           >
-            Documentation
-          </a>
+            全部
+          </Link>
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/?category=${cat.slug}${search ? `&search=${search}` : ""}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                categorySlug === cat.slug
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+              }`}
+            >
+              {cat.name} ({cat._count.products})
+            </Link>
+          ))}
         </div>
-      </main>
+
+        {/* 商品网格 */}
+        {products.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  imageUrl={product.imageUrl}
+                  stock={product.stock}
+                  category={product.category}
+                />
+              ))}
+            </div>
+
+            {/* 分页 */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              urlPattern={`/?${categorySlug ? `category=${categorySlug}&` : ""}${search ? `search=${search}&` : ""}page={page}`}
+            />
+          </>
+        ) : (
+          <div className="text-center py-20 text-gray-500">
+            <p className="text-lg mb-2">暂无商品</p>
+            <p className="text-sm">
+              {search ? "请尝试其他搜索关键词" : "请稍后查看"}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+/** 封装商品查询逻辑 */
+async function fetchProducts(
+  search: string,
+  categorySlug: string,
+  page: number
+) {
+  const where: Record<string, unknown> = {};
+
+  if (search) {
+    where.name = { contains: search };
+  }
+
+  if (categorySlug) {
+    where.category = { slug: categorySlug };
+  }
+
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
+
+  return {
+    products,
+    total,
+    totalPages: Math.ceil(total / PAGE_SIZE),
+  };
 }
