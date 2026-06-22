@@ -33,9 +33,10 @@ export async function verifyPassword(
 // Token 签名与验证（HMAC-SHA256）
 // ============================================================
 
-interface SessionPayload {
+export interface SessionPayload {
   userId: string;
   role: string;
+  userName: string;
   /** 过期时间戳（毫秒） */
   exp: number;
 }
@@ -66,8 +67,8 @@ function signPayload(payload: SessionPayload): string {
   return `${data}.${signature}`;
 }
 
-/** 验证签名并解析 payload，失败或过期返回 null */
-function verifyToken(token: string): SessionPayload | null {
+/** 验证签名并解析 payload，失败或过期返回 null（导出供 Navbar 等组件复用） */
+export function verifySessionToken(token: string): SessionPayload | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 2) return null;
@@ -110,16 +111,18 @@ function cookieOptions() {
 }
 
 /**
- * 设置 Session — 将 userId + role 签名后写入 httpOnly Cookie
- * 生产环境自动启用 secure
+ * 设置 Session — 将 userId + role + userName 签名后写入 httpOnly Cookie
+ * 生产环境自动启用 secure；userName 存入 Cookie 避免 Navbar 额外查库
  */
 export async function setSession(
   userId: string,
-  role: string
+  role: string,
+  userName: string = ""
 ): Promise<void> {
   const payload: SessionPayload = {
     userId,
     role,
+    userName,
     exp: Date.now() + COOKIE_MAX_AGE * 1000,
   };
 
@@ -127,6 +130,14 @@ export async function setSession(
   const cookieStore = await cookies();
 
   cookieStore.set(COOKIE_NAME, token, cookieOptions());
+}
+
+/** 从 Cookie 中读取并验证 session token，返回原始 payload（供 Navbar 等 Server Component 复用） */
+export async function getSessionPayload(): Promise<SessionPayload | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token) return null;
+  return verifySessionToken(token);
 }
 
 /**
@@ -137,14 +148,8 @@ export async function getSession(): Promise<{
   userId: string;
   role: string;
 } | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!token) return null;
-
-  const payload = verifyToken(token);
+  const payload = await getSessionPayload();
   if (!payload) return null;
-
   return { userId: payload.userId, role: payload.role };
 }
 

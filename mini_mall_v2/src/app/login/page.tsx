@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 /**
  * 登录页 — 邮箱 + 密码表单
- * 提交到 /api/auth/login，成功后跳转首页
+ * Admin 登录后跳转 /admin/products
+ * 普通用户跳转 ?redirect 参数指定页或首页
  */
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -39,7 +41,11 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
+      // 管理员 → 商品管理页；普通用户 → ?redirect 指定页或首页
+      const redirect = data.user?.role === "ADMIN"
+        ? "/admin/products"
+        : (searchParams.get("redirect") || "/");
+      router.push(redirect);
       router.refresh();
     } catch {
       setError("网络错误，请稍后重试");

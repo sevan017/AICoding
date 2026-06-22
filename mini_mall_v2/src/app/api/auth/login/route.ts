@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     }
 
     // ---- 写入 session ----
-    await setSession(user.id, user.role);
+    await setSession(user.id, user.role, user.name);
 
     return NextResponse.json({
       message: "登录成功",

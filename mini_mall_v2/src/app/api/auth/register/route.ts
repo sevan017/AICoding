@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     });
 
     // ---- 自动登录：写入 session Cookie ----
-    await setSession(user.id, user.role);
+    await setSession(user.id, user.role, user.name);
 
     return NextResponse.json(
       {
