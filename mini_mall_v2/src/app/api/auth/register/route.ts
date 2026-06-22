@@ -39,10 +39,12 @@ export async function POST(request: Request) {
       select: { id: true },
     });
 
+    // 不暴露"邮箱已注册"给客户端，防止撞库枚举已注册账号
+    // 与登录接口保持一致的匿名化策略
     if (existing) {
       return NextResponse.json(
-        { error: "该邮箱已被注册" },
-        { status: 409 }
+        { error: "注册失败，请稍后重试" },
+        { status: 400 }
       );
     }
 
